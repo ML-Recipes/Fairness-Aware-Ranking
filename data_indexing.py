@@ -21,6 +21,7 @@ class Handler():
             print(e)
             print("/n")
             print("index: ", index)
+            exit()
 
     
 
@@ -175,7 +176,7 @@ if __name__ == "__main__":
         #for city in ['Boston', 'Geneva', 'Hong_Kong']:
         for city in ['Boston']:
             # get documents from DataFrame
-            df = pd.read_csv('data/Airbnb/' + city + '/prep_listings.csv')
+            df = pd.read_csv('data/Airbnb/' + city + '/clean_listings.csv')
             docs = get_docs(df)
             # create handler and save documents to ES 
             api_handler = Handler()
