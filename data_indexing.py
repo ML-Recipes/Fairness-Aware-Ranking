@@ -23,7 +23,20 @@ class Handler():
             print("index: ", index)
             exit()
 
-    
+
+def get_overall_rating(row):
+    review_scores_accuracy = float(row['review_scores_accuracy'])
+    review_scores_cleanliness = float(row['review_scores_cleanliness'])
+    review_scores_checkin = float(row['review_scores_checkin'])
+    review_scores_communication = float(row['review_scores_communication'])
+    review_scores_location = float(row['review_scores_location'])
+    review_scores_value = float(row['review_scores_value'])
+
+    overall_rating = (((review_scores_accuracy + review_scores_cleanliness \
+                      + review_scores_checkin + review_scores_communication \
+                      + review_scores_location + review_scores_value) / 2.0) / 6.0)
+    return overall_rating
+
 
 def get_docs(df):
     """ Get list of documents for a particular dataframe. """
@@ -31,59 +44,8 @@ def get_docs(df):
 
     for _, row in df.iterrows():
 
-        """
-        _id = to_integer(int(row['id']))
-        listing_url = to_string(str(row['listing_url']))
-        scrape_id = to_integer(int(row['scrape_id']))
-        last_scraped = to_string(str(row['last_scraped']))
-        licence = to_string(str(row['license']))
-        name = to_string(str(row['name']))
-        description = to_string(str(row['description']))
-        neighborhood_overview = to_string(str(row['neighborhood_overview']))
-        picture_url = to_string(str(row['picture_url']))
-        host_id = to_integer(int(row['host_id']))
-        host_url = to_string(str(row['host_url']))
-        host_name = to_string(str(row['host_name']))
-        host_since = to_string(str(row['host_since']))
-        host_location = to_string(str(row['host_location']))
-        host_about = to_string(str(row['host_about']))
-        host_response_time = to_string(str(row['host_response_time']))
-        host_response_rate = to_string(str(row['host_response_rate']))
-        host_acceptance_rate = to_string(str(row['host_acceptance_rate']))
-        host_is_superhost = to_string(str(row['host_is_superhost']))
-        host_thumbnail_url = to_string(str(row['host_thumbnail_url']))
-        host_picture_url = to_string(str(row['host_picture_url']))
-        host_neighbourhood = to_string(str(row['host_neighbourhood']))
-        host_listings_count = to_integer(int(row['host_listings_count']))
-        host_total_listings_count = to_integer(int(row['host_total_listings_count']))
-        host_has_profile_pic = to_string(str(row['host_has_profile_pic']))
-        host_identity_verified = to_string(str(row['host_identity_verified']))
-        neighbourhood = to_string(str(row['neighbourhood']))
-        neighbourhood_cleansed = to_string(str(row['neighbourhood_cleansed']))
-        neighbourhood_group_cleansed = to_string(str(row['neighbourhood_group_cleansed']))
-        property_type = to_string(str(row['property_type']))
-        room_type = to_string(str(row['room_type']))
-        accommodates = to_string(str(row['accommodates']))
-        bathrooms = to_string(str(row['bathrooms']))
-        bathrooms_text = to_string(str(row['bathrooms_text']))
-        beds = to_string(str(row['beds']))
-        price = to_string(str(row['price']))
-        calendar_updated = to_string(str(row['calendar_updated']))
-        has_availability = to_string(str(row['has_availability']))
-        availability_30 = to_integer(int(row['availability_30']))
-        availability_60 = to_integer(int(row['availability_60']))
-        availability_90 = to_integer(int(row['availability_90']))
-        availability_365 = to_integer(int(row['availability_365']))
-        number_of_reviews = to_integer(int(row['number_of_reviews']))
-        number_of_reviews_ltm = to_integer(int(row['number_of_reviews_ltm']))
-        number_of_reviews_l30d = to_integer(int(row['number_of_reviews_l30d']))
-        instant_bookable = to_string(str(row['instant_bookable']))
-        calculated_host_listings_count = to_integer(int(row['calculated_host_listings_count']))
-        calculated_host_listings_count_entire_homes = to_integer(int(row['calculated_host_listings_count_entire_homes']))
-        calculated_host_listings_count_private_rooms = to_integer(int(row['calculated_host_listings_count_private_rooms']))
-        calculated_host_listings_count_shared_rooms = to_integer(int(row['calculated_host_listings_count_shared_rooms']))
-        reviews_per_month = to_float(row['reviews_per_month'])
-        """
+        overall_rating = get_overall_rating(row)
+
         doc = {
                 '_id': row['id'],
                 'listing_url': row['listing_url'],
@@ -158,8 +120,8 @@ def get_docs(df):
                 'calculated_host_listings_count_entire_homes': row['calculated_host_listings_count_entire_homes'],
                 'calculated_host_listings_count_private_rooms': row['calculated_host_listings_count_private_rooms'],
                 'calculated_host_listings_count_shared_rooms': row['calculated_host_listings_count_shared_rooms'],
-                'reviews_per_month': row['reviews_per_month']
-                
+                'reviews_per_month': row['reviews_per_month'],
+                'overall_rating': overall_rating
             }
 
         docs.append(doc)
