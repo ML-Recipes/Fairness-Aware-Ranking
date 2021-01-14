@@ -30,6 +30,7 @@ def get_docs(df):
 
     for _, row in df.iterrows():
 
+        """
         _id = to_integer(int(row['id']))
         listing_url = to_string(str(row['listing_url']))
         scrape_id = to_integer(int(row['scrape_id']))
@@ -75,76 +76,74 @@ def get_docs(df):
         number_of_reviews = to_integer(int(row['number_of_reviews']))
         number_of_reviews_ltm = to_integer(int(row['number_of_reviews_ltm']))
         number_of_reviews_l30d = to_integer(int(row['number_of_reviews_l30d']))
-        first_review = to_string(str(row['first_review']))
-        last_review = to_string(str(row['last_review']))
         instant_bookable = to_string(str(row['instant_bookable']))
         calculated_host_listings_count = to_integer(int(row['calculated_host_listings_count']))
         calculated_host_listings_count_entire_homes = to_integer(int(row['calculated_host_listings_count_entire_homes']))
         calculated_host_listings_count_private_rooms = to_integer(int(row['calculated_host_listings_count_private_rooms']))
         calculated_host_listings_count_shared_rooms = to_integer(int(row['calculated_host_listings_count_shared_rooms']))
         reviews_per_month = to_float(row['reviews_per_month'])
-
+        """
         doc = {
-                '_id': _id,
-                'listing_url': listing_url,
-                'scrape_id': scrape_id,
-                'last_scraped': last_scraped,
-                'name': name,
-                'description': description,
-                'neighborhood_overview': neighborhood_overview,
-                'picture_url': picture_url,
-                'host_id': host_id,
-                'host_url': host_url,
-                'host_name': host_name,
-                'host_since': host_since,
-                'host_location': host_location,
-                'host_about': host_about,
-                'host_response_time': host_response_time,
-                'host_response_rate': host_response_rate,
-                'host_acceptance_rate': host_acceptance_rate,
-                'host_is_superhost': host_is_superhost,
-                'host_thumbnail_url': host_thumbnail_url,
-                'host_picture_url': host_picture_url,
-                'host_neighbourhood': host_neighbourhood,
-                'host_listings_count': host_listings_count,
-                'host_total_listings_count': host_total_listings_count,
+                '_id': row['id'],
+                'listing_url': row['listing_url'],
+                'scrape_id': row['scrape_id'],
+                'last_scraped': row['last_scraped'],
+                'name': row['name'],
+                'description': row['description'],
+                'neighborhood_overview': row['neighborhood_overview'],
+                'picture_url': row['picture_url'],
+                'host_id': row['host_id'],
+                'host_url': row['host_url'],
+                'host_name': row['host_name'],
+                'host_since': row['host_since'],
+                'host_location': row['host_location'],
+                'host_about': row['host_about'],
+                'host_response_time': row['host_response_time'],
+                'host_response_rate': row['host_response_rate'],
+                'host_acceptance_rate': row['host_acceptance_rate'],
+                'host_is_superhost': row['host_is_superhost'],
+                'host_thumbnail_url': row['host_thumbnail_url'],
+                'host_picture_url': row['host_picture_url'],
+                'host_neighbourhood': row['host_neighbourhood'],
+                'host_listings_count': row['host_listings_count'],
+                'host_total_listings_count': row['host_total_listings_count'],
                 'host_verifications': row['host_verifications'],
-                'host_has_profile_pic': host_has_profile_pic,
-                'host_identity_verified': host_identity_verified,
-                'neighbourhood': neighbourhood,
-                'neighbourhood_cleansed': neighbourhood_cleansed,
-                'neighbourhood_group_cleansed': neighbourhood_group_cleansed,
+                'host_has_profile_pic': row['host_has_profile_pic'],
+                'host_identity_verified': row['host_identity_verified'],
+                'neighbourhood': row['neighbourhood'],
+                'neighbourhood_cleansed': row['neighbourhood_cleansed'],
+                'neighbourhood_group_cleansed': row['neighbourhood_group_cleansed'],
                 'latitude': row['latitude'],
                 'longitude': row['longitude'],
-                'property_type': property_type,
-                'room_type': room_type,
-                'accommodates': accommodates,
-                'bathrooms': bathrooms,
-                'bathrooms_text': bathrooms_text,
-                'bedrooms': to_float(row['bedrooms']),
-                'beds': beds,
+                'property_type': row['property_type'],
+                'room_type': row['room_type'],
+                'accommodates': row['accommodates'],
+                'bathrooms': row['bathrooms'],
+                'bathrooms_text': row['bathrooms_text'],
+                'bedrooms': row['bedrooms'],
+                'beds': row['beds'],
                 'amenities': row['amenities'],
-                'price': price,
-                'minimum_nights': int(row['minimum_nights']),
-                'maximum_nights': int(row['maximum_nights']),
-                'minimum_minimum_nights': to_integer(row['minimum_minimum_nights']),
-                'maximum_minimum_nights': to_integer(row['maximum_minimum_nights']),
-                'minimum_maximum_nights': to_integer(row['minimum_maximum_nights']),
-                'maximum_maximum_nights': to_integer(row['maximum_maximum_nights']),
-                'minimum_nights_avg_ntm': to_integer(row['minimum_nights_avg_ntm']),
-                'maximum_nights_avg_ntm': to_integer(row['maximum_nights_avg_ntm']),
-                'calendar_updated': calendar_updated,
-                'has_availability': has_availability,
-                'availability_30': availability_30,
-                'availability_60': availability_60,
-                'availability_90': availability_90,
-                'availability_365': availability_365,
+                'price': row['price'],
+                'minimum_nights': row['minimum_nights'],
+                'maximum_nights': row['maximum_nights'],
+                'minimum_minimum_nights': row['minimum_minimum_nights'],
+                'maximum_minimum_nights': row['maximum_minimum_nights'],
+                'minimum_maximum_nights': row['minimum_maximum_nights'],
+                'maximum_maximum_nights': row['maximum_maximum_nights'],
+                'minimum_nights_avg_ntm': row['minimum_nights_avg_ntm'],
+                'maximum_nights_avg_ntm': row['maximum_nights_avg_ntm'],
+                'calendar_updated': row['calendar_updated'],
+                'has_availability': row['has_availability'],
+                'availability_30': row['availability_30'],
+                'availability_60': row['availability_60'],
+                'availability_90': row['availability_90'],
+                'availability_365': row['availability_365'],
                 'calendar_last_scraped': row['calendar_last_scraped'],
-                'number_of_reviews': number_of_reviews,
-                'number_of_reviews_ltm': number_of_reviews_ltm,
-                'number_of_reviews_l30d': number_of_reviews_l30d,
-                'first_review': first_review,
-                'last_review' : last_review,
+                'number_of_reviews': row['number_of_reviews'],
+                'number_of_reviews_ltm': row['number_of_reviews_ltm'],
+                'number_of_reviews_l30d': row['number_of_reviews_l30d'],
+                'first_review': row['first_review'],
+                'last_review' : row['last_review'],
                 'review_scores_rating': row['review_scores_rating'],
                 'review_scores_accuracy': row['review_scores_accuracy'],
                 'review_scores_cleanliness': row['review_scores_cleanliness'],
@@ -152,13 +151,13 @@ def get_docs(df):
                 'review_scores_communication': row['review_scores_communication'],
                 'review_scores_location': row['review_scores_location'],
                 'review_scores_value': row['review_scores_value'],
-                'license': licence,
-                'instant_bookable': instant_bookable,
-                'calculated_host_listings_count': calculated_host_listings_count,
-                'calculated_host_listings_count_entire_homes': calculated_host_listings_count_entire_homes,
-                'calculated_host_listings_count_private_rooms': calculated_host_listings_count_private_rooms,
-                'calculated_host_listings_count_shared_rooms': calculated_host_listings_count_shared_rooms,
-                'reviews_per_month': reviews_per_month
+                'license': row['license'],
+                'instant_bookable': row['instant_bookable'],
+                'calculated_host_listings_count': row['calculated_host_listings_count'],
+                'calculated_host_listings_count_entire_homes': row['calculated_host_listings_count_entire_homes'],
+                'calculated_host_listings_count_private_rooms': row['calculated_host_listings_count_private_rooms'],
+                'calculated_host_listings_count_shared_rooms': row['calculated_host_listings_count_shared_rooms'],
+                'reviews_per_month': row['reviews_per_month']
                 
             }
 
@@ -173,8 +172,8 @@ if __name__ == "__main__":
 
         print("Start indexing ...")
 
-        for city in ['Boston', 'Geneva', 'Hong_Kong']:
-
+        #for city in ['Boston', 'Geneva', 'Hong_Kong']:
+        for city in ['Boston']:
             # get documents from DataFrame
             df = pd.read_csv('data/Airbnb/' + city + '/prep_listings.csv')
             docs = get_docs(df)
