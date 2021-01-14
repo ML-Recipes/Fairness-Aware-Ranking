@@ -173,8 +173,7 @@ if __name__ == "__main__":
 
         print("Start indexing ...")
 
-        #for city in ['Boston', 'Geneva', 'Hong_Kong']:
-        for city in ['Boston']:
+        for city in ['Boston', 'Geneva', 'Hong_Kong']:
             # get documents from DataFrame
             df = pd.read_csv('data/Airbnb/' + city + '/clean_listings.csv')
             docs = get_docs(df)
