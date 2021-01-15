@@ -8,7 +8,7 @@ import logging
 
 es = connections.create_connection(hosts=['localhost'])
 
-class Handler():
+class Indexer():
     def save_docs(self, docs, index):
         if not es.indices.exists(index):
            es.indices.create(index)
@@ -140,8 +140,8 @@ if __name__ == "__main__":
             df = pd.read_csv('data/Airbnb/' + city + '/clean_listings.csv')
             docs = get_docs(df)
             # create handler and save documents to ES 
-            api_handler = Handler()
-            api_handler.save_docs(docs, index='airbnb_' + city.lower())
+            indexer = Indexer()
+            indexer.save_docs(docs, index='airbnb_' + city.lower())
         
         print("Finished indexing ...")
 
