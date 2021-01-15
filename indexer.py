@@ -1,7 +1,5 @@
-from document import ListingDocument
 from elasticsearch_dsl.connections import connections
 from elasticsearch.helpers import bulk
-from helper import to_float, to_integer, to_string
 import pandas as pd
 from tqdm import tqdm 
 import logging
