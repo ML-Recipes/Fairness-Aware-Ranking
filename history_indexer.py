@@ -14,7 +14,7 @@ class Indexer():
 
         try:
             #print("Attempting to index the list of docs using helpers.bulk()")
-            bulk(es, docs, index=index, chunk_size=100, request_timeout=20)
+            bulk(es, docs, index=index, chunk_size=500, request_timeout=10)
         except Exception as e:
             print("Index: %s Error: %s" %(index, e))
 
@@ -137,7 +137,7 @@ if __name__ == "__main__":
 
         print("Start indexing ...")
 
-        path = '/Users/nattiya/Desktop/WayBack_InsideAirBNB/'
+        path = '/Users/daciantamasan/Desktop/WayBack_InsideAirBNB/'
 
         for file in sorted(os.listdir(path)):
             if file.endswith(".csv.gz"):
