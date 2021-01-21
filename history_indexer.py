@@ -141,14 +141,25 @@ if __name__ == "__main__":
 
         for file in sorted(os.listdir(path)):
             if file.endswith(".csv.gz"):
+                # Start from the last check point
+                #if file <= 'crete_2019-02-16_data_listings.csv.gz':
+                #if file <= 'munich_2019-04-17_data_listings.csv.gz':           // 0 file size
+                #if file <= 'new-york-city_2015-01-01_data_listings.csv.gz':    // no listing_url
+                #if file <= 'portland_2015-03-01_data_listings.csv':
+                if (file == 'crete_2019-02-16_data_listings.csv.gz') | (file == 'munich_2019-04-17_data_listings.csv.gz') | (file == 'new-york-city_2015-01-01_data_listings.csv.gz') | (file == 'portland_2015-03-01_data_listings.csv'):
+                    print("Skipping " + file)
+                    continue
 
                 # Extract city name
                 index = file.find("_")
                 city = file[0:index].lower()
 
                 # Read csv
-                df = pd.read_csv(path + file, compression='gzip')
-                df_count = len(df.index)
+                try:
+                    df = pd.read_csv(path + file, compression='gzip')
+                    df_count = len(df.index)
+                except pandas.io.common.EmptyDataError:
+                    continue
 
                 # Convert 'price' to float
                 if('price' in df.columns):
