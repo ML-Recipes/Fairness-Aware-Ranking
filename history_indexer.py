@@ -1,25 +1,22 @@
-from elasticsearch_dsl.connections import connections
-from elasticsearch.helpers import bulk
+
+from elasticsearch_dsl import Index, Document, Text, analyzer
+from elasticsearch import Elasticsearch, helpers
+from airbnb import Listing
 import pandas as pd
-from tqdm import tqdm 
 import logging
 import os
 
+
+from elasticsearch_dsl.connections import connections
 es = connections.create_connection(hosts=['localhost'])
 
-class Indexer():
-    def save_docs(self, docs, index):
-        if not es.indices.exists(index):
-           es.indices.create(index)
+def clean_currency(currency):
+    price = currency.replace('$', '').replace(',', '')
 
-        try:
-            #print("Attempting to index the list of docs using helpers.bulk()")
-            bulk(es, docs, index=index, chunk_size=500, request_timeout=10)
-        except Exception as e:
-            print("Index: %s Error: %s" %(index, e))
-
+    return float(price)
 
 def get_overall_rating(row):
+    """ Get overall rating using review fields as target indicator """
     review_scores_accuracy = float(row['review_scores_accuracy'])
     review_scores_cleanliness = float(row['review_scores_cleanliness'])
     review_scores_checkin = float(row['review_scores_checkin'])
@@ -32,112 +29,129 @@ def get_overall_rating(row):
                       + review_scores_location + review_scores_value) / 2.0) / 6.0)
     return overall_rating
 
+def validate_price(df):
+    # Convert 'price' to float
+    if('price' in df.columns):
+        # Drop rows with null 'price'
+        df = df[df['price'].notna()]
 
-def get_docs(df):
-    """ Get list of documents for a particular dataframe. """
-    docs = []
+        df['price'] = df['price'].apply(clean_currency).astype('float')
 
-    for _, row in df.iterrows():
+    # Handle data with no 'price', e.g., athens_2020-07-21_data_listings.csv.gz
+    elif ('price' not in df.columns) & ('weekly_price' in df.columns):
+        # Drop rows with null 'weekly_price'
+        df = df[df['weekly_price'].notna()]
 
-        overall_rating = get_overall_rating(row)
+        df['weekly_price'] = df['weekly_price'].apply(clean_currency).astype('float')
+        df['price'] = df['weekly_price'] / 7.0
 
-        doc = {
-                '_id': row['id'],
-                'listing_url': row['listing_url'],
-                'scrape_id': row['scrape_id'],
-                'last_scraped': row['last_scraped'],
-                'name': row['name'],
-                #'description': row['description'],
-                #'neighborhood_overview': row['neighborhood_overview'],
-                #'picture_url': row['picture_url'],
-                'host_id': row['host_id'],
-                #'host_url': row['host_url'],
-                #'host_name': row['host_name'],
-                #'host_since': row['host_since'],
-                #'host_location': row['host_location'],
-                #'host_about': row['host_about'],
-                #'host_response_time': row['host_response_time'],
-                #'host_response_rate': row['host_response_rate'],
-                #'host_acceptance_rate': row['host_acceptance_rate'],
-                #'host_is_superhost': row['host_is_superhost'],
-                #'host_thumbnail_url': row['host_thumbnail_url'],
-                #'host_picture_url': row['host_picture_url'],
-                #'host_neighbourhood': row['host_neighbourhood'],
-                #'host_listings_count': row['host_listings_count'],
-                #'host_total_listings_count': row['host_total_listings_count'],
-                #'host_verifications': row['host_verifications'],
-                #'host_has_profile_pic': row['host_has_profile_pic'],
-                #'host_identity_verified': row['host_identity_verified'],
-                #'neighbourhood': row['neighbourhood'],
-                #'neighbourhood_cleansed': row['neighbourhood_cleansed'],
-                #'neighbourhood_group_cleansed': row['neighbourhood_group_cleansed'],
-                #'latitude': row['latitude'],
-                #'longitude': row['longitude'],
-                #'property_type': row['property_type'],
-                #'room_type': row['room_type'],
-                #'accommodates': row['accommodates'],
-                #'bathrooms': row['bathrooms'],
-                #'bathrooms_text': row['bathrooms_text'],
-                #'bedrooms': row['bedrooms'],
-                #'beds': row['beds'],
-                #'amenities': row['amenities'],
-                'price': row['price'],
-                #'minimum_nights': row['minimum_nights'],
-                #'maximum_nights': row['maximum_nights'],
-                #'minimum_minimum_nights': row['minimum_minimum_nights'],
-                #'maximum_minimum_nights': row['maximum_minimum_nights'],
-                #'minimum_maximum_nights': row['minimum_maximum_nights'],
-                #'maximum_maximum_nights': row['maximum_maximum_nights'],
-                #'minimum_nights_avg_ntm': row['minimum_nights_avg_ntm'],
-                #'maximum_nights_avg_ntm': row['maximum_nights_avg_ntm'],
-                #'calendar_updated': row['calendar_updated'],
-                #'has_availability': row['has_availability'],
-                'availability_30': row['availability_30'],
-                'availability_60': row['availability_60'],
-                'availability_90': row['availability_90'],
-                'availability_365': row['availability_365'],
-                #'calendar_last_scraped': row['calendar_last_scraped'],
-                'number_of_reviews': row['number_of_reviews'],
-                #'number_of_reviews_ltm': row['number_of_reviews_ltm'],
-                #'number_of_reviews_l30d': row['number_of_reviews_l30d'],
-                'first_review': row['first_review'],
-                'last_review' : row['last_review'],
-                'review_scores_rating': row['review_scores_rating'],
-                'review_scores_accuracy': row['review_scores_accuracy'],
-                'review_scores_cleanliness': row['review_scores_cleanliness'],
-                'review_scores_checkin': row['review_scores_checkin'],
-                'review_scores_communication': row['review_scores_communication'],
-                'review_scores_location': row['review_scores_location'],
-                'review_scores_value': row['review_scores_value'],
-                #'license': row['license'],
-                #'instant_bookable': row['instant_bookable'],
-                #'calculated_host_listings_count': row['calculated_host_listings_count'],
-                #'calculated_host_listings_count_entire_homes': row['calculated_host_listings_count_entire_homes'],
-                #'calculated_host_listings_count_private_rooms': row['calculated_host_listings_count_private_rooms'],
-                #'calculated_host_listings_count_shared_rooms': row['calculated_host_listings_count_shared_rooms'],
-                #'reviews_per_month': row['reviews_per_month'],
-                'overall_rating': overall_rating
-            }
+        #pd.set_option('display.max_columns', None)
+        #print(df)
+        #exit()
+    else:
+        df['price'] = None
 
-        docs.append(doc)
+    return df
 
-    return docs
+def get_features(df):
+    """ Select specific columns and convert date columnd to string. """
+    
+    df = df[
+            [ 
+                'id', 'listing_url', 'scrape_id', 'last_scraped', 'name', 'host_id', 'price', 
+                'availability_30', 'availability_60', 'availability_90', 'availability_365', 
+                'number_of_reviews', 'first_review', 'last_review', 'review_scores_rating', 
+                'review_scores_accuracy', 'review_scores_cleanliness', 'review_scores_checkin', 
+                'review_scores_communication', 'review_scores_location', 'review_scores_value'
+            ]
+    ]
+    
+    return df
 
-def clean_currency(x):
-    """ If the value is a string, then remove currency symbol and delimiters
-    otherwise, the value is numeric and can be converted
-    """
-    if isinstance(x, str):
-        return(x.replace('$', '').replace(',', ''))
-    return(x)
+def drop_no_reviews(df):
+    """ Drop no review records. """
+    
+    df = df[df.first_review.notnull() & df.last_review.notnull() & df.review_scores_rating.notnull() & df.review_scores_accuracy.notnull() & df.review_scores_accuracy.notnull() & df.review_scores_cleanliness.notnull() & df.review_scores_checkin.notnull() & df.review_scores_communication.notnull() & df.review_scores_location.notnull() & df.review_scores_value.notnull()]
 
-if __name__ == "__main__":
+    return df
+
+def drop_null_values(df):
+    """ Drop records with NaN values. """
+    
+    df = df.dropna()
+
+    return df
+
+def ingest_data(df, index):
+    """ Finalize data and ingest a bulk of documents to ES index """
 
     try:
+        docs = []
+        for _, row in df.iterrows():
+            doc = Listing()
+            overall_rating = get_overall_rating(row)
+            
+            if 'id' in row:
+                doc.id = row['id']
+            if 'listing_url' in row:
+                doc.listing_url = row['listing_url']
+            if 'scrape_id' in row:
+                doc.scrape_id = row['scrape_id']
+            if 'last_scraped' in row:
+                doc.last_scraped = str(row['last_scraped']).replace("-", "")
+            if 'name' in row:
+                doc.name = row['name']
+            if 'host_id' in row:
+                doc.host_id = row['host_id']
+            if 'price' in row:
+                doc.price = row['price']
+            if 'availability_30' in row:
+                doc.availability_30 = row['availability_30']
+            if 'availability_60' in row:
+                doc.availability_60 = row['availability_60']
+            if 'availability_90' in row:
+                doc.availability_90 = row['availability_90']
+            if 'availability_365' in row:
+                doc.availability_365 = row['availability_365']
+            if 'number_of_reviews' in row:
+                doc.number_of_reviews = row['number_of_reviews']
+            if 'first_review' in row:
+                doc.first_review = str(row['first_review']).replace("-", "")
+            if 'last_review' in row:
+                doc.last_review = str(row['last_review']).replace("-", "")
+            if 'review_scores_rating' in row:
+                doc.review_scores_rating = row['review_scores_rating']
+            if 'review_scores_accuracy' in row:
+                doc.review_scores_accuracy = row['review_scores_accuracy']
+            if 'review_scores_cleanliness' in row:
+                doc.review_scores_cleanliness = row['review_scores_cleanliness']
+            if 'review_scores_checkin' in row:
+                doc.review_scores_checkin = row['review_scores_checkin']
+            if 'review_scores_communication' in row:
+                doc.review_scores_communication = row['review_scores_communication']
+            if 'review_scores_location' in row:
+                doc.review_scores_location = row['review_scores_location']
+            if 'review_scores_value' in row:
+                doc.review_scores_value = row['review_scores_value']
+          
+            doc.overall_rating = overall_rating
+
+            docs.append(doc.to_dict(include_meta=False))
+
+        response = helpers.bulk(es, actions=docs, index=index, doc_type='doc')
+            
+    except Exception:
+        logging.error('exception occured', exc_info=True)
+
+
+if __name__ == "__main__":
+    try:
+
+        unique_list = [] 
 
         print("Start indexing ...")
 
-        path = '/Users/daciantamasan/Desktop/WayBack_InsideAirBNB/'
+        path = '/Users/nattiya/Desktop/WayBack_InsideAirBNB/'
 
         for file in sorted(os.listdir(path)):
             if file.endswith(".csv.gz"):
@@ -146,91 +160,67 @@ if __name__ == "__main__":
                 #if file <= 'munich_2019-04-17_data_listings.csv.gz':           // 0 file size
                 #if file <= 'new-york-city_2015-01-01_data_listings.csv.gz':    // no listing_url
                 #if file <= 'portland_2015-03-01_data_listings.csv':
-                if (file == 'crete_2019-02-16_data_listings.csv.gz') | (file == 'munich_2019-04-17_data_listings.csv.gz') | (file == 'new-york-city_2015-01-01_data_listings.csv.gz') | (file == 'portland_2015-03-01_data_listings.csv'):
-                    print("Skipping " + file)
-                    continue
-
+                #if not file.startswith('boston'):
+                
                 # Extract city name
-                index = file.find("_")
-                city = file[0:index].lower()
+                name = file.find("_")
+                city = file[0:name].lower()
+                
+                # Load original listing data
+                df = pd.read_csv(path + file, compression='gzip')
+                
+                # Pre-process raw data
+                # Step 1: Enrich raw data with price
+                df = validate_price(df)
+                raw_count = len(df)
+                
+                # Step 2: Drop records with no reviews
+                df = get_features(df)
+                df = drop_no_reviews(df)
+                review_count = len(df)
+                
+                # Step 3: Drop records with null values
+                df = drop_null_values(df)
+                final_count = len(df)
+                
+                # Obtain the index name
+                index_name = 'airbnb_history_' + city
 
-                # Read csv
-                try:
-                    df = pd.read_csv(path + file, compression='gzip')
-                    df_count = len(df.index)
-                except pandas.io.common.EmptyDataError:
-                    continue
+                # Check if the city is seen for the first time 
+                if index_name not in unique_list:
 
-                # Convert 'price' to float
-                if('price' in df.columns):
-                    # Drop rows with null 'price'
-                    df = df[df['price'].notna()]
+                    print("\tNew! Indexing %s with %d orig. rows, %d rows with reviews, %d final rows" % (city, raw_count, review_count, final_count))
+                    
+                    unique_list.append(index_name)
+                
+                    # Initialize index (only perform once)
+                    index = Index(index_name)
 
-                    df['price'] = df['price'].apply(clean_currency).astype('float')
+                    # Define custom settings
+                    index.settings(
+                        number_of_shards=1,
+                        number_of_replicas=0
+                    )
 
-                # Handle data with no 'price', e.g., athens_2020-07-21_data_listings.csv.gz
-                elif ('price' not in df.columns) & ('weekly_price' in df.columns):
-                    # Drop rows with null 'weekly_price'
-                    df = df[df['weekly_price'].notna()]
+                    # Delete the index, ignore if it doesn't exist
+                    index.delete(ignore=404)
 
-                    df['weekly_price'] = df['weekly_price'].apply(clean_currency).astype('float')
-                    df['price'] = df['weekly_price'] / 7.0
+                    # Create the index in elasticsearch
+                    index.create()
 
-                    #pd.set_option('display.max_columns', None)
-                    #print(df)
-                    #exit()
+                    # Register a document with the index
+                    index.document(Listing)
+
                 else:
-                    continue
+                    print("\tIndexing %s with %d orig. rows, %d rows with reviews, %d final rows" % (city, raw_count, review_count, final_count))
 
-                df_w_price_count = len(df.index)
-
-                # Select a subset of all columns
-                df = df[['id', 'listing_url', 'scrape_id', 'last_scraped', 'name', 'host_id', 'host_since', 'price', 'availability_30', 'availability_60', 'availability_90', 'availability_365', 'number_of_reviews', 'first_review', 'last_review', 'review_scores_rating', 'review_scores_accuracy', 'review_scores_cleanliness', 'review_scores_checkin', 'review_scores_communication', 'review_scores_location', 'review_scores_value']]
-
-                clean_df = df[df.first_review.notnull() & df.last_review.notnull() & df.review_scores_rating.notnull() & df.review_scores_accuracy.notnull() & df.review_scores_accuracy.notnull() & df.review_scores_cleanliness.notnull() & df.review_scores_checkin.notnull() & df.review_scores_communication.notnull() & df.review_scores_location.notnull() & df.review_scores_value.notnull()]
-
-                df_w_review_count = len(clean_df.index)
-
-                # Fill NaN with " " for string values
-                #clean_df[['id', 'listing_url', 'scrape_id', 'last_scraped', 'name', 'host_id', 'price', 'first_review', 'last_review']].fillna(value=" ", inplace=True)
-
-                # Fill NaN with 0 for integer values
-                #clean_df[['availability_30', 'availability_60', 'availability_90', 'availability_365', 'number_of_reviews', 'review_scores_rating', 'review_scores_accuracy', 'review_scores_cleanliness', 'review_scores_checkin', 'review_scores_communication', 'review_scores_location', 'review_scores_value']].fillna(value=0, inplace=True)
-
-                #df1 = clean_df[clean_df.isna().any(axis=1)]
-                #pd.set_option('display.max_columns', None)
-                #print(df1)
-
-                # Drop records with NaN values
-                final_df = clean_df.dropna()
-
-                final_df_count = len(final_df.index)
-
-                docs = get_docs(final_df)
-
-                print("\tIndexing %s with %d org. rows, %d rows with price, %d rows with reviews, %d final rows" %(file, df_count, df_w_price_count, df_w_review_count, final_df_count))
-
-                # create handler and save documents to ES 
-                indexer = Indexer()
-                indexer.save_docs(docs, index='airbnb_history_' + city)
-        
+                ingest_data(df, index=index_name)
+                
         print("Finished indexing ...")
-
     
     except Exception:
         logging.error('exception occured', exc_info=True)
-
-
     
-
-
-
+    
    
-
-
-
-
-
-
-
 
