@@ -189,7 +189,7 @@ if __name__ == "__main__":
                 # Check if the city is seen for the first time 
                 if index_name not in unique_list:
 
-                    print("\tNew! Indexing %s with %d orig. rows, %d rows with reviews, %d final rows" % (city, raw_count, review_count, final_count))
+                    print("\tNew index %s with %d orig. rows, %d rows with reviews, %d final rows" % (file, raw_count, review_count, final_count))
                     
                     unique_list.append(index_name)
                 
@@ -212,7 +212,7 @@ if __name__ == "__main__":
                     index.document(Listing)
 
                 else:
-                    print("\tIndexing %s with %d orig. rows, %d rows with reviews, %d final rows" % (city, raw_count, review_count, final_count))
+                    print("\tOld index %s with %d orig. rows, %d rows with reviews, %d final rows" % (file, raw_count, review_count, final_count))
 
                 ingest_data(df, index=index_name)
                 
