@@ -158,10 +158,11 @@ if __name__ == "__main__":
                 # Start from the last check point
                 #if file <= 'crete_2019-02-16_data_listings.csv.gz':
                 #if file <= 'munich_2019-04-17_data_listings.csv.gz':           // 0 file size
-                #if file <= 'new-york-city_2015-01-01_data_listings.csv.gz':    // no listing_url
+                if file <= 'new-york-city_2015-01-01_data_listings.csv.gz':    # no listing_url
                 #if file <= 'portland_2015-03-01_data_listings.csv':
                 #if not file.startswith('boston'):
-                
+                    continue
+
                 # Extract city name
                 name = file.find("_")
                 city = file[0:name].lower()
