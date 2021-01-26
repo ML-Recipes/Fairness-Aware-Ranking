@@ -151,16 +151,17 @@ if __name__ == "__main__":
 
         print("Start indexing ...")
 
-        path = '/Users/nattiya/Desktop/WayBack_InsideAirBNB/'
+        path = '/Users/daciantamasan/Desktop/WayBack_InsideAirBNB/'
 
         for file in sorted(os.listdir(path)):
             if file.endswith(".csv.gz"):
                 # Start from the last check point
                 #if file <= 'crete_2019-02-16_data_listings.csv.gz':
                 #if file <= 'munich_2019-04-17_data_listings.csv.gz':           // 0 file size
-                #if file <= 'new-york-city_2015-01-01_data_listings.csv.gz':    // no listing_url
                 #if file <= 'portland_2015-03-01_data_listings.csv':
-                #if not file.startswith('boston'):
+            
+                if file <= 'new-york-city_2015-01-01_data_listings.csv.gz':    # no listing_url
+                    continue
                 
                 # Extract city name
                 name = file.find("_")
