@@ -49,8 +49,16 @@ def validate_price(df):
         #print(df)
         #exit()
     else:
-        df['price'] = None
+        df['price'] = 0
 
+    return df
+
+def get_crawled_date(df):
+    """ Extract crawled date from the 'scrape_id' field. """
+
+    df['crawled_date'] = df['scrape_id'].astype(str)
+    df['crawled_date'] = df['crawled_date'].apply(lambda x: x[:8])
+    
     return df
 
 def get_features(df):
@@ -99,6 +107,8 @@ def ingest_data(df, index):
                 doc.scrape_id = row['scrape_id']
             if 'last_scraped' in row:
                 doc.last_scraped = str(row['last_scraped']).replace("-", "")
+            if 'crawled_date' in row:
+                doc.crawled_date = row['crawled_date']
             if 'name' in row:
                 doc.name = row['name']
             if 'host_id' in row:
@@ -151,7 +161,7 @@ if __name__ == "__main__":
 
         print("Start indexing ...")
 
-        path = '/Users/daciantamasan/Desktop/WayBack_InsideAirBNB/'
+        path = '/Users/nattiya/Desktop/WayBack_InsideAirBNB/'
 
         for file in sorted(os.listdir(path)):
             if file.endswith(".csv.gz"):
@@ -166,10 +176,11 @@ if __name__ == "__main__":
                 df = pd.read_csv(path + file, compression='gzip')
                 
                 # Pre-process raw data
-                # Step 1: Enrich raw data with price
+                # Step 1: Enrich raw data with price and crawled date
                 df = validate_price(df)
+                df = get_crawled_date(df)
                 raw_count = len(df)
-                
+
                 # Step 2: Drop records with no reviews
                 df = get_features(df)
                 df = drop_no_reviews(df)

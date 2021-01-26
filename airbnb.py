@@ -5,6 +5,7 @@ class Listing(Document):
     listing_url = Text()
     scrape_id = Integer()
     last_scraped = Text(fields={'raw': Keyword()})
+    crawled_date = Text(fields={'raw': Keyword()})
     name = Text(analyzer='snowball')
     host_id = Integer()
     price = Integer()
