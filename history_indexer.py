@@ -186,8 +186,7 @@ if __name__ == "__main__":
                 # Start from the last check point
                 #if file <= 'crete_2019-02-16_data_listings.csv.gz':
                 #if file <= 'munich_2019-04-17_data_listings.csv.gz':           // 0 file size
-                if file < 'boston_2020-07-11_data_listings.csv.gz':
-                    continue
+                #if file < 'boston_2020-07-11_data_listings.csv.gz':
 
                 # Extract city name
                 name = file.find("_")
