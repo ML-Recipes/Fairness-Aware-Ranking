@@ -10,10 +10,15 @@ import os
 from elasticsearch_dsl.connections import connections
 es = connections.create_connection(hosts=['localhost'])
 
-def clean_currency(currency):
-    price = currency.replace('$', '').replace(',', '')
+def clean_currency(price):
+    
+    if '$' in price:
+        price = price.replace('$', '')
 
-    return float(price)
+    if ',' in price:
+        price = price.replace(',', '')
+
+    return price
 
 def get_overall_rating(row):
     """ Get overall rating using review fields as target indicator """
@@ -30,26 +35,30 @@ def get_overall_rating(row):
     return overall_rating
 
 def validate_price(df):
+    
     # Convert 'price' to float
     if('price' in df.columns):
-        # Drop rows with null 'price'
-        df = df[df['price'].notna()]
+        # Fill rows with null 'price'
+        df['price'].fillna(value='0', inplace=True)
 
         df['price'] = df['price'].apply(clean_currency).astype('float')
 
     # Handle data with no 'price', e.g., athens_2020-07-21_data_listings.csv.gz
-    elif ('price' not in df.columns) & ('weekly_price' in df.columns):
-        # Drop rows with null 'weekly_price'
-        df = df[df['weekly_price'].notna()]
+    elif ('price' not in df.columns):
+        
+        if ('weekly_price' in df.columns):
 
-        df['weekly_price'] = df['weekly_price'].apply(clean_currency).astype('float')
-        df['price'] = df['weekly_price'] / 7.0
+            # Fill rows with null 'weekly_price'
+            df['weekly_price'].fillna(value='0', inplace=True)
+            
+            df['weekly_price'] = df['weekly_price'].apply(clean_currency).astype('float')
+            df['price'] = df['weekly_price'] / 7.0
 
-        #pd.set_option('display.max_columns', None)
-        #print(df)
-        #exit()
-    else:
-        df['price'] = 0
+        else:
+            
+            # Set missigng 'price' and 'weekly_price' to 0
+            df['price'].fillna(value='0', inplace=True)
+            df['weekly_price'].fillna(value='0', inplace=True)
 
     return df
 
@@ -76,10 +85,19 @@ def get_features(df):
     
     return df
 
-def drop_no_reviews(df):
-    """ Drop no review records. """
+def validate_reviews(df):
+    """ Enrich no review records with default review scores. """
     
-    df = df[df.first_review.notnull() & df.last_review.notnull() & df.review_scores_rating.notnull() & df.review_scores_accuracy.notnull() & df.review_scores_accuracy.notnull() & df.review_scores_cleanliness.notnull() & df.review_scores_checkin.notnull() & df.review_scores_communication.notnull() & df.review_scores_location.notnull() & df.review_scores_value.notnull()]
+    df['first_review'].fillna(value='1991-01-01', inplace=True)
+    df['last_review'].fillna(value='0', inplace=True)
+    df['review_scores_rating'].fillna(value='0', inplace=True)
+    df['review_scores_accuracy'].fillna(value='0', inplace=True)
+    df['review_scores_accuracy'].fillna(value='0', inplace=True)
+    df['review_scores_cleanliness'].fillna(value='0', inplace=True)
+    df['review_scores_checkin'].fillna(value='0', inplace=True)
+    df['review_scores_communication'].fillna(value='0', inplace=True)
+    df['review_scores_location'].fillna(value='0', inplace=True)
+    df['review_scores_value'].fillna(value='0', inplace=True)
 
     return df
 
@@ -168,6 +186,9 @@ if __name__ == "__main__":
                 # Start from the last check point
                 #if file <= 'crete_2019-02-16_data_listings.csv.gz':
                 #if file <= 'munich_2019-04-17_data_listings.csv.gz':           // 0 file size
+                if file < 'boston_2020-07-11_data_listings.csv.gz':
+                    continue
+
                 # Extract city name
                 name = file.find("_")
                 city = file[0:name].lower()
@@ -181,9 +202,9 @@ if __name__ == "__main__":
                 df = get_crawled_date(df)
                 raw_count = len(df)
 
-                # Step 2: Drop records with no reviews
+                # Step 2: Assign ratings to listings with no reviews
                 df = get_features(df)
-                df = drop_no_reviews(df)
+                df = validate_reviews(df)
                 review_count = len(df)
                 
                 # Step 3: Drop records with null values
