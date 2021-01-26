@@ -75,7 +75,7 @@ def get_features(df):
     
     df = df[
             [ 
-                'id', 'listing_url', 'scrape_id', 'last_scraped', 'name', 'host_id', 'price', 
+                'id', 'listing_url', 'scrape_id', 'last_scraped', 'crawled_date', 'name', 'host_id', 'price', 
                 'availability_30', 'availability_60', 'availability_90', 'availability_365', 
                 'number_of_reviews', 'first_review', 'last_review', 'review_scores_rating', 
                 'review_scores_accuracy', 'review_scores_cleanliness', 'review_scores_checkin', 
