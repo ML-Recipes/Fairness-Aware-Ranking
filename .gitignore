@@ -7,3 +7,6 @@ notebook/.ipynb_checkpoints/05. Analyzing Impressions over Time-checkpoint.ipynb
 __pycache__/airbnb.cpython-38.pyc
 notebook/.ipynb_checkpoints/05. Analyzing Distribution over Time-checkpoint.ipynb
 notebook/airbnb_boston.json
+notebook/.ipynb_checkpoints/06. Export index data to a json file-checkpoint.ipynb
+notebook/airbnb_geneva.json
+notebook/airbnb_hong-kong.json
