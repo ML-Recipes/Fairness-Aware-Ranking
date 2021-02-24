@@ -1,13 +1,24 @@
-from elasticsearch_dsl import Document, Text, analyzer, Integer, Keyword, Double
+from elasticsearch_dsl import analyzer, Date, Document, Index, Text, Integer, Keyword, Double
 
 class Listing(Document):
     id = Integer()
     listing_url = Text()
     scrape_id = Integer()
-    last_scraped = Text(fields={'raw': Keyword()})
-    crawled_date = Text(fields={'raw': Keyword()})
+    last_scraped = Keyword()
+    crawled_date = Date()
     name = Text(analyzer='snowball')
     host_id = Integer()
+    host_is_superhost = Keyword()
+    host_identity_verified = Text(fields={'raw': Keyword()})
+    room_type = Text(fields={'raw': Keyword()})
+    accommodates = Integer()
+    guests_included = Integer()
+    minimum_nights = Integer()
+    maximum_nights = Integer()
+    calendar_updated = Text(fields={'raw': Keyword()})
+    instant_bookable = Keyword()
+    is_business_travel_ready = Keyword()
+    cancellation_policy = Text(fields={'raw': Keyword()})
     price = Integer()
     availability_30 = Integer()
     availability_60 = Integer()
