@@ -1,5 +1,5 @@
 
-from elasticsearch_dsl import Index, Document, Text, analyzer
+from elasticsearch_dsl import analyzer, Date, Document, Index, Text, Integer, Keyword, Double
 from elasticsearch import Elasticsearch, helpers
 from airbnb import Listing
 import pandas as pd
@@ -70,13 +70,54 @@ def get_crawled_date(df):
     
     return df
 
+def gen_missing_columns(df):
+    """ Extract 'guests_included' from the 'accommodates' field. """
+
+    if 'host_is_superhost' not in df.columns:
+        df['host_is_superhost'] = "f"
+
+    if 'host_identity_verified' not in df.columns:
+        df['host_identity_verified'] = "f"
+
+    if 'room_type' not in df.columns:
+        df['room_type'] = "n/a"
+
+    if 'accommodates' not in df.columns:
+        df['accommodates'] = 0
+
+    if 'guests_included' not in df.columns:
+        df['guests_included'] = df['accommodates']
+
+    if 'minimum_nights' not in df.columns:
+        df['minimum_nights'] = 0
+
+    if 'maximum_nights' not in df.columns:
+        df['maximum_nights'] = 0
+
+    if 'calendar_updated' not in df.columns:
+        df['calendar_updated'] = "n/a"
+
+    if 'instant_bookable' not in df.columns:
+        df['instant_bookable'] = "f"
+
+    if 'is_business_travel_ready' not in df.columns:
+        df['is_business_travel_ready'] = "f"
+
+    if 'cancellation_policy' not in df.columns:
+        df['cancellation_policy'] = "n/a"
+
+    return df
+
 def get_features(df):
     """ Select specific columns and convert date columnd to string. """
     
     df = df[
             [ 
-                'id', 'listing_url', 'scrape_id', 'last_scraped', 'crawled_date', 'name', 'host_id', 'price', 
-                'availability_30', 'availability_60', 'availability_90', 'availability_365', 
+                'id', 'listing_url', 'scrape_id', 'last_scraped', 'crawled_date', 
+                'name', 'host_id', 'host_is_superhost', 'host_identity_verified', 
+                'room_type', 'accommodates', 'guests_included','minimum_nights', 
+                'maximum_nights', 'calendar_updated', 'instant_bookable', 'is_business_travel_ready', 'cancellation_policy',
+                'price', 'availability_30', 'availability_60', 'availability_90', 'availability_365', 
                 'number_of_reviews', 'first_review', 'last_review', 'review_scores_rating', 
                 'review_scores_accuracy', 'review_scores_cleanliness', 'review_scores_checkin', 
                 'review_scores_communication', 'review_scores_location', 'review_scores_value'
@@ -90,14 +131,14 @@ def validate_reviews(df):
     
     df['first_review'].fillna(value='1991-01-01', inplace=True)
     df['last_review'].fillna(value='0', inplace=True)
-    df['review_scores_rating'].fillna(value='0', inplace=True)
-    df['review_scores_accuracy'].fillna(value='0', inplace=True)
-    df['review_scores_accuracy'].fillna(value='0', inplace=True)
-    df['review_scores_cleanliness'].fillna(value='0', inplace=True)
-    df['review_scores_checkin'].fillna(value='0', inplace=True)
-    df['review_scores_communication'].fillna(value='0', inplace=True)
-    df['review_scores_location'].fillna(value='0', inplace=True)
-    df['review_scores_value'].fillna(value='0', inplace=True)
+    df['review_scores_rating'].fillna(value=0, inplace=True)
+    df['review_scores_accuracy'].fillna(value=0, inplace=True)
+    df['review_scores_accuracy'].fillna(value=0, inplace=True)
+    df['review_scores_cleanliness'].fillna(value=0, inplace=True)
+    df['review_scores_checkin'].fillna(value=0, inplace=True)
+    df['review_scores_communication'].fillna(value=0, inplace=True)
+    df['review_scores_location'].fillna(value=0, inplace=True)
+    df['review_scores_value'].fillna(value=0, inplace=True)
 
     return df
 
@@ -107,6 +148,14 @@ def drop_null_values(df):
     df = df.dropna()
 
     return df
+
+def fill_null_values(df):
+    """ Fill records with NaN values. """
+    
+    df = df.fillna(value=" ")
+
+    return df
+    
 
 def ingest_data(df, index):
     """ Finalize data and ingest a bulk of documents to ES index """
@@ -131,6 +180,28 @@ def ingest_data(df, index):
                 doc.name = row['name']
             if 'host_id' in row:
                 doc.host_id = row['host_id']
+            if 'host_is_superhost' in row:
+                doc.host_is_superhost = row['host_is_superhost']
+            if 'host_identity_verified'in row:
+                doc.host_identity_verified = row['host_identity_verified']
+            if 'room_type' in row:
+                doc.room_type = row['room_type']
+            if 'accommodates' in row:
+                doc.accommodates = row['accommodates']
+            if 'guests_included' in row:
+                doc.guests_included = row['guests_included']
+            if 'minimum_nights' in row:
+                doc.minimum_nights = row['minimum_nights']
+            if 'maximum_nights' in row:
+                doc.maximum_nights = row['maximum_nights']
+            if 'calendar_updated' in row:
+                doc.calendar_updated = row['calendar_updated']
+            if 'instant_bookable' in row:
+                doc.instant_bookable = row['instant_bookable']
+            if 'is_business_travel_ready' in row:
+                doc.is_business_travel_ready = row['is_business_travel_ready']
+            if 'cancellation_policy' in row:
+                doc.cancellation_policy = row['cancellation_policy']
             if 'price' in row:
                 doc.price = row['price']
             if 'availability_30' in row:
@@ -182,7 +253,7 @@ if __name__ == "__main__":
         path = '/Users/nattiya/Desktop/WayBack_InsideAirBNB/'
 
         for file in sorted(os.listdir(path)):
-            if file.endswith(".csv.gz"):
+            if (file.startswith("boston") or file.startswith("geneva") or file.startswith("hong-kong"))and file.endswith(".csv.gz"):
                 # Start from the last check point
                 #if file <= 'crete_2019-02-16_data_listings.csv.gz':
                 #if file <= 'munich_2019-04-17_data_listings.csv.gz':           // 0 file size
@@ -199,6 +270,7 @@ if __name__ == "__main__":
                 # Step 1: Enrich raw data with price and crawled date
                 df = validate_price(df)
                 df = get_crawled_date(df)
+                df = gen_missing_columns(df)
                 raw_count = len(df)
 
                 # Step 2: Assign ratings to listings with no reviews
@@ -207,7 +279,8 @@ if __name__ == "__main__":
                 review_count = len(df)
                 
                 # Step 3: Drop records with null values
-                df = drop_null_values(df)
+                #df = drop_null_values(df)
+                df = fill_null_values(df)
                 final_count = len(df)
                 
                 # Obtain the index name
