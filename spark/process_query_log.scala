@@ -1,5 +1,6 @@
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
+import org.apache.spark.sql.SaveMode
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import com.fasterxml.jackson.core.JsonParseException
@@ -104,8 +105,9 @@ val result_schema = new StructType()
           ), true)
       )
 
-val df = spark.read.json("notebook/search_log.json")
-var search_logs = df.select(explode($"results").as("record")).filter($"record.full_request_path".contains("search.json")).select($"record.timestamp", $"record.request_body", $"record.response_body")
+val df = spark.read.json("../log/airbnb-history-boston/*.json")
+
+var search_logs = df.select(explode($"results").as("record")).filter(!$"record.full_request_path".contains("search.json")).select($"record.timestamp", $"record.request_body", $"record.response_body")
 
 var rankedResults = search_logs.collect().map(x => {Seq(x.getString(2)).toDS.toDF.withColumn("data", from_json($"value", result_schema)).withColumn("timestamp", lit(x.getString(0))).withColumn("request", lit(x.getString(1))).select($"timestamp", $"request", $"data.meta.request_id".as("search_id"), $"data.meta.page.current".as("paginated_id"), $"data.meta.page.total_pages".as("total_pages"), $"data.meta.page.total_results".as("total_results"), $"data.meta.page.size".as("result_size"), posexplode($"data.results"), regexp_replace(substring_index($"request", "\",", 1), "\\{\"query\":\"", "").as("query"))})
 
