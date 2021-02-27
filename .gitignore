@@ -853,3 +853,6 @@ notebook/airbnb-history-boston-raw-search-logs.csv
 notebook/airbnb-history-geneva-raw-search-logs.csv
 notebook/airbnb-history-boston-impressions.csv
 notebook/airbnb-history-geneva-impressions.csv
+notebook/.ipynb_checkpoints/08. Extract search impressions-checkpoint.ipynb
+notebook/.ipynb_checkpoints/09. Analyze marketplace inequality-checkpoint.ipynb
+notebook/boston_historical_listing.csv
