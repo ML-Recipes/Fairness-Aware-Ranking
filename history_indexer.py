@@ -152,7 +152,29 @@ def drop_null_values(df):
 def fill_null_values(df):
     """ Fill records with NaN values. """
     
-    df = df.fillna(value=" ")
+    df['listing_url'].fillna(value=' ', inplace=True)
+    df['scrape_id'].fillna(value=0, inplace=True)
+    df['last_scraped'].fillna(value='1991-01-01', inplace=True)
+    df['crawled_date'].fillna(value='1991-01-01', inplace=True)
+    df['name'].fillna(value=' ', inplace=True)
+    df['host_id'].fillna(value=0, inplace=True)
+    df['host_is_superhost'].fillna(value=' ', inplace=True)
+    df['host_identity_verified'].fillna(value=' ', inplace=True)
+    df['room_type'].fillna(value=' ', inplace=True)
+    df['accommodates'].fillna(value=0, inplace=True)
+    df['guests_included'].fillna(value=0, inplace=True)
+    df['minimum_nights'].fillna(value=0, inplace=True)
+    df['maximum_nights'].fillna(value=0, inplace=True)
+    df['calendar_updated'].fillna(value=' ', inplace=True)
+    df['instant_bookable'].fillna(value=' ', inplace=True)
+    df['is_business_travel_ready'].fillna(value=' ', inplace=True)
+    df['cancellation_policy'].fillna(value=' ', inplace=True)
+    df['price'].fillna(value=0, inplace=True)
+    df['availability_30'].fillna(value=0, inplace=True)
+    df['availability_60'].fillna(value=0, inplace=True)
+    df['availability_90'].fillna(value=0, inplace=True)
+    df['availability_365'].fillna(value=0, inplace=True)
+    df['number_of_reviews'].fillna(value=0, inplace=True)
 
     return df
     
@@ -253,7 +275,12 @@ if __name__ == "__main__":
         path = '/Users/nattiya/Desktop/WayBack_InsideAirBNB/'
 
         for file in sorted(os.listdir(path)):
-            if (file.startswith("boston") or file.startswith("geneva") or file.startswith("hong-kong"))and file.endswith(".csv.gz"):
+            # Index cities reported in ACL'2020 paper
+            # if (file.startswith("boston") or file.startswith("geneva") or file.startswith("hong-kong"))and file.endswith(".csv.gz"):
+
+            # Top 10 cities by active listings (https://www.alltherooms.com/analytics/airbnb-statistics/):
+            if (file.startswith("london") or file.startswith("paris") or file.startswith("new-york-city") or file.startswith("rome") or file.startswith("rio-de-janeiro") or file.startswith("buenos-aires") or file.startswith("sydney") or file.startswith("mexico-city") or file.startswith("barcelona"))and file.endswith(".csv.gz"):
+            
                 # Start from the last check point
                 #if file <= 'crete_2019-02-16_data_listings.csv.gz':
                 #if file <= 'munich_2019-04-17_data_listings.csv.gz':           // 0 file size
