@@ -860,3 +860,4 @@ notebook/airbnb_london_0.json
 notebook/airbnb_london_1.json
 notebook/airbnb_london_2.json
 notebook/.ipynb_checkpoints/10. Ingest data to Elastic App Search-checkpoint.ipynb
+docker-elk/

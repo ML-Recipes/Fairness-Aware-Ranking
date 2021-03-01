@@ -279,7 +279,8 @@ if __name__ == "__main__":
             # if (file.startswith("boston") or file.startswith("geneva") or file.startswith("hong-kong"))and file.endswith(".csv.gz"):
 
             # Top 10 cities by active listings (https://www.alltherooms.com/analytics/airbnb-statistics/):
-            if (file.startswith("london") or file.startswith("paris") or file.startswith("new-york-city") or file.startswith("rome") or file.startswith("rio-de-janeiro") or file.startswith("buenos-aires") or file.startswith("sydney") or file.startswith("mexico-city") or file.startswith("barcelona"))and file.endswith(".csv.gz"):
+            #if (file.startswith("london") or file.startswith("paris") or file.startswith("new-york-city") or file.startswith("rome") or file.startswith("rio-de-janeiro") or file.startswith("buenos-aires") or file.startswith("sydney") or file.startswith("mexico-city") or file.startswith("barcelona")) and file.endswith(".csv.gz"):
+            if (file.startswith("london") or file.startswith("barcelona")) and (("2019-" in file) or ("2020-" in file)) and file.endswith(".csv.gz"):
             
                 # Start from the last check point
                 #if file <= 'crete_2019-02-16_data_listings.csv.gz':
